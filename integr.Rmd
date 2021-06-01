@@ -6,4 +6,6 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
+
+a <- read.csv("M.csv",sep=",",skip=6)
 ```
