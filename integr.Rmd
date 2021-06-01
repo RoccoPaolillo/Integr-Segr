@@ -7,6 +7,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 
-a <- read.csv("M.csv",sep=",",skip=6)
-b <- read.csv("basic_compl.csv",sep=",",skip=6)
+a <- read.csv("datasets/M.csv",sep=",",skip=6)
+b <- read.csv("datasets/basic_compl.csv",sep=",",skip=6)
+
 ```
