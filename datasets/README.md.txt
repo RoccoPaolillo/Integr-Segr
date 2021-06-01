@@ -1,3 +1,1 @@
-- common_beta_single_peaked.csv: global determinism parameter < rp_commonbeta.nlogo
-- basic_compl.csv: complementary dominant-secondary < value_weight.nlogo
-- M.csv: M parameter for decreasing  utility < value_weight_M.nlogo
+aaaa
