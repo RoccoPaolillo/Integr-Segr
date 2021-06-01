@@ -9,19 +9,8 @@ library(ggplot2)
 library(dplyr)
 
 M <- read.csv("datasets/M.csv",sep=",",skip=6)
-basic1 <- read.csv("datasets/basic_compl.csv",sep=",",skip=6)
-basic2 <- read.csv("datasets/basic_compl.csv",sep=",",skip=6)
+basic <- read.csv("datasets/basic_compl.csv",sep=",",skip=6)
 glob <- read.csv("datasets/global.csv",sep=",",skip=6)
 
-names(M) <- pull(read.csv("legend_M.csv"))
-names(basic1) <- pull(read.csv("legend_basic.csv"))
-names(basic2) <- pull(read.csv("legend_basic.csv"))
-basic <- rbind(basic1,basic2)
-
-names(glob) <- pull(read.csv("legend_global.csv"))
-
-write.csv(M,"M.csv",row.names = F)
-write.csv(basic,"basic.csv",row.names = F)
-write.csv(glob,"global.csv",row.names = F)
 
 ```
