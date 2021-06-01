@@ -1,0 +1,10 @@
+@article{yavacs2019dissecting,
+  title={Dissecting income segregation: Impacts of concentrated affluence on segregation of poverty},
+  author={Yava{\c{s}}, Mustafa},
+  journal={The Journal of Mathematical Sociology},
+  volume={43},
+  number={1},
+  pages={1--22},
+  year={2019},
+  publisher={Taylor \& Francis}
+}
