@@ -592,7 +592,7 @@ eth_con
 eth_con
 0
 1
-0.5
+1.0
 0.1
 1
 NIL
@@ -607,7 +607,7 @@ eth_lib
 eth_lib
 0
 1
-0.5
+1.0
 0.1
 1
 NIL
@@ -622,7 +622,7 @@ val_con
 val_con
 0
 1
-0.5
+1.0
 0.1
 1
 NIL
@@ -637,7 +637,7 @@ val_lib
 val_lib
 0
 1
-0.7
+1.0
 0.1
 1
 NIL
@@ -652,7 +652,7 @@ determinism
 determinism
 0
 1000
-552.0
+20.0
 1
 1
 NIL
@@ -667,7 +667,7 @@ dominant_con
 dominant_con
 0
 1
-1.0
+0.5
 0.1
 1
 NIL
@@ -682,7 +682,7 @@ dominant_lib
 dominant_lib
 0
 1
-0.7
+0.5
 0.1
 1
 NIL
@@ -783,40 +783,54 @@ true
 true
 "" ""
 PENS
-"_cons-eth_" 1.0 0 -2674135 true "let l n-values 101 [ i -> i]\n\nif utility_function = \"threshold\" [\nforeach l  [\n i -> ifelse i >= (eth_con * 100) [plot 1][plot 0]\n ]\n]\n \n if utility_function = \"single-peaked\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (eth_con * 100)) [ (i / (eth_con * 100))][ \n  precision ( (eth_con) + (( (1 -  (i / 100)) * (1 - (eth_con)))  / (1 - (eth_con))) ) 3]\n ]\n \n]\n\n if utility_function = \"Zhang\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (eth_con * 100)) [ (i / (eth_con * 100))][ \n precision(  (2 - (M_con)) + ( (((M_con) - 1) * i) / (eth_con * 100))   )3]\n ]\n \n]\n" ""
-"..cons-val.." 1.0 2 -2674135 true "let l n-values 101 [ i -> i]\n\nif utility_function = \"threshold\" [\nforeach l  [\n i -> ifelse i >= (val_con * 100) [plot 1][plot 0]\n ]\n]\n \n if utility_function = \"single-peaked\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (val_con * 100)) [ (i / (val_con * 100))][ \n  precision ( (val_con) + (( (1 -  (i / 100)) * (1 - (val_con)))  / (1 - (val_con))) ) 3]\n ]\n \n]\n\n if utility_function = \"Zhang\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (val_con * 100)) [ (i / (val_con * 100))][ \n precision(  (2 - (M_con)) + ( (((M_con) - 1) * i) / (val_con * 100))   )3]\n ]\n \n]\n" ""
-"_lib-eth_" 1.0 0 -10899396 true "let l n-values 101 [ i -> i]\n\nif utility_function = \"threshold\" [\nforeach l  [\n i -> ifelse i >= (eth_lib * 100) [plot 1][plot 0]\n ]\n]\n \n if utility_function = \"single-peaked\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (eth_lib * 100)) [ (i / (eth_lib * 100))][ \n  precision ( (eth_lib) + (( (1 -  (i / 100)) * (1 - (eth_lib)))  / (1 - (eth_lib))) ) 3]\n ]\n \n]\n\nif utility_function = \"Zhang\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (eth_lib * 100)) [ (i / (eth_lib * 100))][ \n precision(  (2 - (M_lib)) + ( (((M_lib) - 1) * i) / (eth_lib * 100))   )3]\n ]\n \n]\n" ""
-"..lib-val.." 1.0 2 -10899396 true "let l n-values 101 [ i -> i]\n\nif utility_function = \"threshold\" [\nforeach l  [\n i -> ifelse i >= (val_lib * 100) [plot 1][plot 0]\n ]\n]\n \n if utility_function = \"single-peaked\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (val_lib * 100)) [ (i / (val_lib * 100))][ \n  precision ( (val_lib) + (( (1 -  (i / 100)) * (1 - (val_lib)))  / (1 - (val_lib))) ) 3]\n ]\n \n]\n\n if utility_function = \"Zhang\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (val_lib * 100)) [ (i / (val_lib * 100))][ \n precision(  (2 - (M_lib)) + ( (((M_lib) - 1) * i) / (val_lib * 100))   )3]\n ]\n \n]\n" ""
+"_cons-eth_" 1.0 0 -2674135 true "let l n-values 101 [ i -> i]\n\nif utility_function = \"threshold\" [\nforeach l  [\n i -> ifelse i >= (eth_con * 100) [plot 1][plot 0]\n ]\n]\n \n if utility_function = \"single-peaked\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (eth_con * 100)) [ (i / (eth_con * 100))][ \n  precision ( (eth_con) + (( (1 -  (i / 100)) * (1 - (eth_con)))  / (1 - (eth_con))) ) 3]\n ]\n \n]\n" ""
+"..cons-val.." 1.0 2 -2674135 true "let l n-values 101 [ i -> i]\n\nif utility_function = \"threshold\" [\nforeach l  [\n i -> ifelse i >= (val_con * 100) [plot 1][plot 0]\n ]\n]\n \n if utility_function = \"single-peaked\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (val_con * 100)) [ (i / (val_con * 100))][ \n  precision ( (val_con) + (( (1 -  (i / 100)) * (1 - (val_con)))  / (1 - (val_con))) ) 3]\n ]\n \n]\n" ""
+"_lib-eth_" 1.0 0 -10899396 true "let l n-values 101 [ i -> i]\n\nif utility_function = \"threshold\" [\nforeach l  [\n i -> ifelse i >= (eth_lib * 100) [plot 1][plot 0]\n ]\n]\n \n if utility_function = \"single-peaked\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (eth_lib * 100)) [ (i / (eth_lib * 100))][ \n  precision ( (eth_lib) + (( (1 -  (i / 100)) * (1 - (eth_lib)))  / (1 - (eth_lib))) ) 3]\n ]\n \n]\n" ""
+"..lib-val.." 1.0 2 -10899396 true "let l n-values 101 [ i -> i]\n\nif utility_function = \"threshold\" [\nforeach l  [\n i -> ifelse i >= (val_lib * 100) [plot 1][plot 0]\n ]\n]\n \n if utility_function = \"single-peaked\" [\n foreach l  [\n  i -> plot ifelse-value (i <= (val_lib * 100)) [ (i / (val_lib * 100))][ \n  precision ( (val_lib) + (( (1 -  (i / 100)) * (1 - (val_lib)))  / (1 - (val_lib))) ) 3]\n ]\n \n]\n" ""
 
-SLIDER
-4
-310
-116
-343
-M_con
-M_con
-0
+MONITOR
+1014
+482
+1100
+527
+eth_con_100
+ifelse-value (100 <= (eth_con * 100)) [ (100 / (eth_con * 100))][ \n  precision ( eth_con + (( (1 -  (100 / 100)) * (1 - eth_con) )  / (1 - eth_con) ) ) 3]
+17
 1
-1.0
-0.1
-1
-NIL
-HORIZONTAL
+11
 
-SLIDER
-4
-431
-116
-464
-M_lib
-M_lib
-0
+MONITOR
+1105
+481
+1190
+526
+val_con_100
+ifelse-value (100 <= (val_con * 100)) [ (100 / (val_con * 100))][ \n  precision ( (val_con) + (( (1 -  (100 / 100)) * (1 - (val_con)))  / (1 - (val_con))) ) 3]
+17
 1
-1.0
-0.1
+11
+
+MONITOR
+1016
+531
+1099
+576
+val_lib_100
+ifelse-value (100 <= (val_lib * 100)) [ (100 / (val_lib * 100))][ \n  precision ( (val_lib) + (( (1 -  (100 / 100)) * (1 - (val_lib)))  / (1 - (val_lib))) ) 3]
+17
 1
-NIL
-HORIZONTAL
+11
+
+MONITOR
+1104
+531
+1182
+576
+eth_lib_100
+ifelse-value (100 <= (eth_lib * 100)) [ (100 / (eth_lib * 100))][ \n  precision ( (eth_lib) + (( (1 -  (100 / 100)) * (1 - (eth_lib)))  / (1 - (eth_lib))) ) 3]
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

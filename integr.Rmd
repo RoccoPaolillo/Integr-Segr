@@ -15,11 +15,22 @@ glob <- read.csv("datasets/global.csv",sep=",")
 ```
 
 
+```{r global_analysis, fig.cap="Analysis global", include=TRUE}
+
+excl <- names(glob) %in% c("run", "density","step","utility_function")
+glob <- glob[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,eth_con,val_lib,eth_lib,val_con,determinism) %>% summarise_all(mean)
+
+
+
+
+```
+
 ```{r M_analysis, fig.cap="Integrationist comparison, M", include=TRUE}
 
 excl <- names(M) %in% c("run", "density","step")
 M <- M[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,M_con,eth_con,val_con,dominant_lib,M_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean)
 
-
+# baseline: dominant_con/lib = 1
+# compare heatmap: hold dominant_con = 1, dominant_lib = 0.5, heatmap: y-axis = M_lib, x-axis= determinism. However, works more for liberals from the logic of agents' behavior
 
 ```
