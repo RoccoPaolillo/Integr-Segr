@@ -8,9 +8,18 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(dplyr)
 
-M <- read.csv("datasets/M.csv",sep=",",skip=6)
-basic <- read.csv("datasets/basic_compl.csv",sep=",",skip=6)
-glob <- read.csv("datasets/global.csv",sep=",",skip=6)
+M <- read.csv("datasets/M.csv",sep=",")
+basic <- read.csv("datasets/basic.csv",sep=",")
+glob <- read.csv("datasets/global.csv",sep=",")
+
+```
+
+
+```{r M_analysis, fig.cap="Integrationist comparison, M", include=TRUE}
+
+excl <- names(M) %in% c("run", "density","step")
+M <- M[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,M_con,eth_con,val_con,dominant_lib,M_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean)
+
 
 
 ```
