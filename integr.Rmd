@@ -7,15 +7,249 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(dplyr)
+library(reshape2)
+library(forcats)
+library(tidyr)
+library(reshape)
+library(plotly)
+library(gridExtra)
+library(ggpubr)
 
-M <- read.csv("datasets/M.csv",sep=",")
-basic <- read.csv("datasets/basic.csv",sep=",")
-glob <- read.csv("datasets/global.csv",sep=",")
+sp <- read.csv("datasets/sp.csv",sep=",")
+excl <- names(sp) %in% c("run", "density","step","utility_function")
+sp <- sp[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,eth_con,val_con,dominant_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean)
+
+sp_diagonal <- read.csv("datasets/sp_diagonal.csv",sep=",")
+excl <- names(sp_diagonal) %in% c("run", "density","step","utility_function")
+sp_diagonal <- sp_diagonal[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,eth_con,dominant_lib,val_lib,secondary,determinism) %>% summarise_all(mean)
+
+
+M_fin <-  read.csv("datasets/M_fin.csv",sep=",")
+excl <- names(M_fin) %in% c("run", "density","step")
+M_fin <- M_fin[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,M_con,eth_con,val_con,dominant_lib,M_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean)  
+
+M_con.labs <- c("M value conservatives \n0.1", "M value conservatives \n0.5", "M value conservatives \n1")
+names(M_con.labs) <- c("0.1","0.5","1")
+M_lib.labs <-  c("M ethnic liberals \n0.1", "M ethnic liberals \n0.5", "M ethnic liberals \n1")
+names(M_lib.labs) <- c("0.1","0.5","1")
+
+M2_dom <- read.csv("datasets/2M_dom.csv",sep=",")
+excl <- names(M2_dom) %in% c("run", "density","step")
+M2_dom <- M2_dom[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,M_con_dom,eth_con,M_con_sec,val_con,dominant_con,M_lib_dom,val_lib,M_lib_sec,eth_lib,dominant_lib,determinism)%>% summarise_all(mean)  
+# M <-  read.csv("datasets/M.csv",sep=",")
+# excl <- names(M) %in% c("run", "density","step")
+# M <- M[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,M_con,eth_con,val_con,dominant_lib,M_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean) 
+  
+```
+
+
+```{r sp, fig.cap="General sp: effect dominant", include=TRUE}
+
+
+
+spdf <- read.csv("vw_range_secondary.csv",skip = 6, sep=",")
+names(spdf) <- pull(read.csv("TRASH/legend_basic.csv"))
+excl <- names(spdf) %in% c("run", "density","step","utility_function")
+spdf <- spdf[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,eth_con,val_con,dominant_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean)
+spdf$et_sq <- rowMeans(spdf[,c("et_sq_bl","et_sq_or")],na.rm = TRUE)
+spdf$vl_sq <- rowMeans(spdf[,c("vl_sq_bl","vl_sq_or")],na.rm = TRUE)
+spdf$et_cl <-  rowMeans(spdf[,c("et_cl_bl","et_cl_or")],na.rm = TRUE)
+spdf$vl_cl <-  rowMeans(spdf[,c("vl_cl_bl","vl_cl_or")],na.rm = TRUE)
+
+dominant_lib.labs <- c("Ethnic Liberal =0.5", "Ethnic Liberal=1")
+names(dominant_lib.labs) <- c("0.5","1")
+dominant_con.labs <- c("Value Conservative =0.5", "Value Conservative=1")
+names(dominant_con.labs) <- c("0.5","1")
+
+
+
+
+
+
+spdf <- spdf %>% gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
+  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
+   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" ))
+
+sp_d <- spdf %>% filter(dominant_con == dominant_lib) %>% filter(dominant_con == 0.5 | dominant_con == 1) %>% filter(eth_lib == 1 & val_con == 1)
+
+baseline <-  ggplot(sp_d,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+  scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
+ facet_wrap(~  factor( dominant_con, levels = c("1","0.5"))) +
+  xlab("determinism") +
+  ylab("Segregation") +
+  theme_bw()+
+  theme(legend.position = "bottom")
+
+
+
+baseline
+
+```
+
+```{r Mfin,  include = TRUE}
+
+
+M_fin_glob <- M_fin  %>%   gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
+  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
+   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" )) 
+
+
+
+Mgl_lib <- M_fin_glob %>% filter(dominant_lib == 1 & dominant_con == 0.5 & val_con == 0.5) 
+
+Mgl_lib_p <- ggplot(Mgl_lib,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+  scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
+  facet_wrap(~ M_con, labeller = labeller(M_con = M_con.labs)) +
+  xlab("determinism") +
+  ylab("Segregation") +
+  ggtitle("Value Liberals = 1") +
+    theme_bw() +
+  theme(legend.position = "bottom")
+  
+
+
+Mgl_con <- M_fin_glob %>% filter(dominant_con == 1 & dominant_lib == 0.5 & eth_lib == 0.5) 
+
+Mgl_con_p <- ggplot(Mgl_con,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+   scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
+  facet_wrap(~ M_lib, labeller = labeller(M_lib = M_lib.labs)) +
+  xlab("determinism") +
+  ylab("Segregation") +
+   ggtitle("Ethnic Conservatives = 1") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+  
+
+ggpubr::ggarrange(Mgl_lib_p,Mgl_con_p, nrow =2, common.legend=TRUE, legend = "bottom")
 
 ```
 
 
-```{r global_analysis, fig.cap="Analysis global", include=TRUE}
+
+
+
+```{r Mfin_interaction,  include = TRUE}
+
+M_or <- M_fin %>%  filter(dominant_con==0.5 & dominant_lib==0.5) %>% filter(eth_con == 1 & val_lib == 1) %>% filter(eth_lib == 0.5) %>% filter(val_con == 0.5)  %>% gather(key=subgroup, value = Segra,et_sq,vl_sq, et_cl,vl_cl) %>%  mutate(
+  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
+   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" )) 
+
+lib_con_e <- ggplot(M_or[which(M_or$subgroup==c("et_cl")),],aes(x=determinism,y=Segra,color= as.factor(M_con))) +  geom_point(size=2) + geom_line() +
+  facet_wrap(~ M_lib, labeller = labeller(M_lib = M_lib.labs)) +
+  scale_color_manual(values=c("green","red","blue"), labels=c("0.1","0.5","1"),name="M value conservative") +
+#  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Ethnic Segregation") +
+  theme_bw() +
+   theme(legend.position = "bottom")
+
+lib_con_v <- ggplot(M_or[which(M_or$subgroup==c("vl_cl")),],aes(x=determinism,y=Segra,color= as.factor(M_con))) +  geom_point(size=2) + geom_line() +
+  facet_wrap(~ M_lib, labeller = labeller(M_lib = M_lib.labs)) +
+  scale_color_manual(values=c("green","red","blue"), labels=c("0.1","0.5","1"),name="M value conservative") +
+#  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Value Segregation") +
+  theme_bw() +
+   theme(legend.position = "bottom")
+
+libs <- ggpubr::ggarrange(lib_con_e,lib_con_v, nrow =2, common.legend=TRUE, legend = "bottom")
+
+libs <- ggpubr::annotate_figure(libs,
+               top = text_grob("Behavior Liberals \n(maximize value)",size = 13))
+
+
+con_lib_e <- ggplot(M_or[which(M_or$subgroup==c("et_sq")),],aes(x=determinism,y=Segra,color= as.factor(M_lib))) +  geom_point(size=2) + geom_line() +
+  facet_wrap(~ M_con, labeller = labeller(M_con = M_con.labs)) +
+  scale_color_manual(values=c("green","red","blue"), labels=c("0.1","0.5","1"),name="M ethnic liberals") +
+#  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Ethnic Segregation") +
+  theme_bw() +
+   theme(legend.position = "bottom")
+
+con_lib_v <- ggplot(M_or[which(M_or$subgroup==c("vl_sq")),],aes(x=determinism,y=Segra,color= as.factor(M_lib))) +  geom_point(size=2) + geom_line() +
+  facet_wrap(~ M_con, labeller = labeller(M_con = M_con.labs)) +
+  scale_color_manual(values=c("green","red","blue"), labels=c("0.1","0.5","1"),name="M ethnic liberals") +
+#  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Value Segregation") +
+  theme_bw() +
+   theme(legend.position = "bottom")
+
+cons <- ggpubr::ggarrange(con_lib_e,con_lib_v, nrow =2, common.legend=TRUE, legend = "bottom")
+
+cons <- ggpubr::annotate_figure(cons,
+               top = text_grob("Behavior Conservatives \n(maximize ethnicity)",size = 13))
+
+libs
+cons
+
+
+ ggplot(M_or,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+   scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
+  facet_grid(M_con ~  M_lib, labeller = labeller(M_lib = M_lib.labs, M_con = M_con.labs)) +
+  xlab("determinism") +
+  ylab("Segregation") +
+  # ggtitle("Ethnic Conservatives = 1") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+ 
+ 
+libs
+ 
+
+ 
+ 
+```
+
+
+
+
+##### Back
+
+
+```{r dominant_baseline complicated,  include = TRUE}
+# Simplify
+
+M2_dom <- M2_dom  %>%   gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
+  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
+   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" )) 
+
+# M2_baseline <- M2_dom %>% filter(val_lib == 0.5)
+M2_dom_bsl <- M2_dom %>% filter(val_lib == eth_con & M_con_dom == 1 & M_lib_dom == 1) %>% filter(val_lib == 0.5 | val_lib == 1 )
+bsl <- ggplot(M2_dom_bsl,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+  scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
+facet_wrap(~ val_lib) +
+  xlab("determinism") +
+  ylab("Segregation") +
+    theme_bw() +
+  theme(legend.position = "bottom")
+  
+  
+  bsl_lib <- M2_dom %>% filter(eth_con==1) %>% filter(val_lib==0.5 | val_lib==1)
+bsl_lib_p <-  ggplot(bsl_lib,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+  scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
+  facet_grid(~ eth_con + val_lib) +
+  xlab("determinism") +
+  ylab("Segregation") +
+    theme_bw() +
+  theme(legend.position = "bottom")
+bsl_lib_p
+
+
+bsl
+```
+
+
+
+
+```{r global_analysis, fig.cap="Analysis global", include=FALSE}
 
 excl <- names(glob) %in% c("run", "density","step","utility_function")
 glob <- glob[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,eth_con,val_lib,eth_lib,val_con,determinism) %>% summarise_all(mean)
@@ -25,12 +259,133 @@ glob <- glob[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,eth_co
 
 ```
 
-```{r M_analysis, fig.cap="Integrationist comparison, M", include=TRUE}
 
+```{r M, fig.cap="General M", include=TRUE}
+
+M <- read.csv("datasets/M.csv",sep=",")
+M$et_sq <- rowMeans(M[,c("et_sq_bl","et_sq_or")],na.rm = TRUE)
+M$vl_sq <- rowMeans(M[,c("vl_sq_bl","vl_sq_or")],na.rm = TRUE)
+M$et_cl <-  rowMeans(M[,c("et_cl_bl","et_cl_or")],na.rm = TRUE)
+M$vl_cl <-  rowMeans(M[,c("vl_cl_bl","vl_cl_or")],na.rm = TRUE)
 excl <- names(M) %in% c("run", "density","step")
 M <- M[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,M_con,eth_con,val_con,dominant_lib,M_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean)
 
-# baseline: dominant_con/lib = 1
-# compare heatmap: hold dominant_con = 1, dominant_lib = 0.5, heatmap: y-axis = M_lib, x-axis= determinism. However, works more for liberals from the logic of agents' behavior
+
+
+
+M_glob <- M %>% gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
+  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
+   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" ))
+
+
+M_d <- M_glob %>% filter(dominant_con ==1,dominant_lib==1,M_con==1,M_lib==1)
+
+baseline_M <- ggplot(M_d,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Segregation") +
+  theme_bw()
+
+
+M_etlib <- M_glob %>% filter(dominant_con == 0.5,dominant_lib==0.5,M_con == 0.5) 
+ggplot(M_etlib,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
+  facet_wrap(~ M_lib) +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Segregation") +
+  theme_bw()
+
+# leaving dominant_lib= 1 too strong
+# increasing val_con, implicit the value segregation will increase
+
+M_cons <- M_glob %>% filter(dominant_con == 0.5,dominant_lib==0.5,M_lib ==0.5) # by-product too strong
+ggplot(M_cons,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
+  facet_wrap(~ M_con) +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Segregation") +
+  theme_bw()
+
+
+```
+
+```{r M_orientation, fig.cap="Sorted by orientation", inckude= TRUE}
+
+M_or <- M %>%  filter(dominant_con==0.5 & dominant_lib==0.5)   %>% filter(M_con ==0.1|M_con == 0.5|M_con ==1) %>% filter(M_lib==0.1|M_lib==0.5|M_lib==1) %>% gather(key=subgroup, value = Segra,et_sq,vl_sq, et_cl,vl_cl)
+
+lib_con <- ggplot(M_or[which(M_or$subgroup==c("et_cl","vl_cl")),],aes(x=determinism,y=Segra,linetype=subgroup,color= as.factor(M_lib))) +  geom_point(size=2) + geom_line() +
+  facet_wrap(~ M_con) +
+  scale_color_manual(values=c("purple","green","red","blue"), labels=c("0","0.1","0.5","1"),name="M_lib") +
+  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Segregation") +
+  ggtitle("Liberals,facet:conservatives") +
+  theme_bw()
+
+
+con_lib <- ggplot(M_or[which(M_or$subgroup==c("et_sq","vl_sq")),],aes(x=determinism,y=Segra,linetype=subgroup,color= as.factor(M_con))) +  geom_point(size=2) + geom_line() +
+  facet_wrap(~ M_lib) +
+  scale_color_manual(values=c("purple","green","red","blue"), labels=c("0","0.1","0.5","1"),name="M_con") +
+  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Segregation") +
+  ggtitle("Conservatives, facet:liberals") +
+  theme_bw()
+
+lib_con
+con_lib
+# %>% mutate(  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic"="et_cl","values"="vl_cl"),"ethnic"))
+
+```
+
+
+```{r sp_baseline, include=TRU}
+# There is nothing special from the sp function....
+
+sp_diagonal <- sp_diagonal %>%  gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
+  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
+   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" ))
+
+ggplot(sp_diagonal,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
+  facet_wrap(~secondary) +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Segregation") +
+  ggtitle("Y: val_con, X: eth_lib")  +
+  theme_bw()
+
+
+sp <- sp %>%  gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
+  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
+   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" ))
+
+sp_et <- sp %>% filter(dominant_con == 0.5 & dominant_lib==0.5) %>% filter(eth_lib == 0.5)
+  
+ggplot(sp_et,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
+  facet_wrap(~val_con) +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Segregation") +
+  # ggtitle("Y: val_con, X: eth_lib")  +
+  theme_bw()
+
+
+sp_vl <- sp %>% filter(dominant_con == 0.5 & dominant_lib==0.5) %>% filter(val_con == 0.5)
+  
+ggplot(sp_vl,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
+  facet_wrap(~eth_lib) +
+  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
+  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
+  xlab("determinism") +
+  ylab("Segregation") +
+  # ggtitle("Y: val_con, X: eth_lib")  +
+  theme_bw()
+
+
 
 ```
