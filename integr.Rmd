@@ -1,6 +1,20 @@
 ---
-title: "Integrationist, segregationist preferences"
-output: pdf_document
+output: 
+  pdf_document:
+   keep_tex: yes
+toc: false
+fig_caption: yes
+title: "Segregationist and integrationist preferences for cross-category in Schelling model"
+author: "Rocco Paolillo"
+keywords: "spatial segregation, discrete choice, integration"
+date: "one dataset on 20 runs `r format(Sys.time(), '%d/%m/%y %H:%M')`"
+bibliography: "references.bib"
+
+header-includes: 
+- \usepackage{float}
+- \usepackage{multirow}
+- \usepackage{subcaption}
+- \usepackage{xfrac}  
 ---
 
 ```{r setup, include=FALSE}
@@ -15,377 +29,129 @@ library(plotly)
 library(gridExtra)
 library(ggpubr)
 
-sp <- read.csv("datasets/sp.csv",sep=",")
-excl <- names(sp) %in% c("run", "density","step","utility_function")
-sp <- sp[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,eth_con,val_con,dominant_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean)
-
-sp_diagonal <- read.csv("datasets/sp_diagonal.csv",sep=",")
-excl <- names(sp_diagonal) %in% c("run", "density","step","utility_function")
-sp_diagonal <- sp_diagonal[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,eth_con,dominant_lib,val_lib,secondary,determinism) %>% summarise_all(mean)
-
-
-M_fin <-  read.csv("datasets/M_fin.csv",sep=",")
-excl <- names(M_fin) %in% c("run", "density","step")
-M_fin <- M_fin[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,M_con,eth_con,val_con,dominant_lib,M_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean)  
-
-M_con.labs <- c("M value conservatives \n0.1", "M value conservatives \n0.5", "M value conservatives \n1")
-names(M_con.labs) <- c("0.1","0.5","1")
-M_lib.labs <-  c("M ethnic liberals \n0.1", "M ethnic liberals \n0.5", "M ethnic liberals \n1")
-names(M_lib.labs) <- c("0.1","0.5","1")
-
-M2_dom <- read.csv("datasets/2M_dom.csv",sep=",")
-excl <- names(M2_dom) %in% c("run", "density","step")
-M2_dom <- M2_dom[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,M_con_dom,eth_con,M_con_sec,val_con,dominant_con,M_lib_dom,val_lib,M_lib_sec,eth_lib,dominant_lib,determinism)%>% summarise_all(mean)  
-# M <-  read.csv("datasets/M.csv",sep=",")
-# excl <- names(M) %in% c("run", "density","step")
-# M <- M[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,M_con,eth_con,val_con,dominant_lib,M_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean) 
-  
-```
-
-
-```{r sp, fig.cap="General sp: effect dominant", include=TRUE}
-
-
-
-spdf <- read.csv("vw_range_secondary.csv",skip = 6, sep=",")
-names(spdf) <- pull(read.csv("TRASH/legend_basic.csv"))
-excl <- names(spdf) %in% c("run", "density","step","utility_function")
-spdf <- spdf[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,eth_con,val_con,dominant_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean)
-spdf$et_sq <- rowMeans(spdf[,c("et_sq_bl","et_sq_or")],na.rm = TRUE)
-spdf$vl_sq <- rowMeans(spdf[,c("vl_sq_bl","vl_sq_or")],na.rm = TRUE)
-spdf$et_cl <-  rowMeans(spdf[,c("et_cl_bl","et_cl_or")],na.rm = TRUE)
-spdf$vl_cl <-  rowMeans(spdf[,c("vl_cl_bl","vl_cl_or")],na.rm = TRUE)
-
-dominant_lib.labs <- c("Ethnic Liberal =0.5", "Ethnic Liberal=1")
-names(dominant_lib.labs) <- c("0.5","1")
-dominant_con.labs <- c("Value Conservative =0.5", "Value Conservative=1")
-names(dominant_con.labs) <- c("0.5","1")
-
-
-
-
-
-
-spdf <- spdf %>% gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
-  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
-   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" ))
-
-sp_d <- spdf %>% filter(dominant_con == dominant_lib) %>% filter(dominant_con == 0.5 | dominant_con == 1) %>% filter(eth_lib == 1 & val_con == 1)
-
-baseline <-  ggplot(sp_d,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-  scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
- facet_wrap(~  factor( dominant_con, levels = c("1","0.5"))) +
-  xlab("determinism") +
-  ylab("Segregation") +
-  theme_bw()+
-  theme(legend.position = "bottom")
-
-
-
-baseline
-
-```
-
-```{r Mfin,  include = TRUE}
-
-
-M_fin_glob <- M_fin  %>%   gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
-  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
-   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" )) 
-
-
-
-Mgl_lib <- M_fin_glob %>% filter(dominant_lib == 1 & dominant_con == 0.5 & val_con == 0.5) 
-
-Mgl_lib_p <- ggplot(Mgl_lib,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-  scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
-  facet_wrap(~ M_con, labeller = labeller(M_con = M_con.labs)) +
-  xlab("determinism") +
-  ylab("Segregation") +
-  ggtitle("Value Liberals = 1") +
-    theme_bw() +
-  theme(legend.position = "bottom")
-  
-
-
-Mgl_con <- M_fin_glob %>% filter(dominant_con == 1 & dominant_lib == 0.5 & eth_lib == 0.5) 
-
-Mgl_con_p <- ggplot(Mgl_con,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-   scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
-  facet_wrap(~ M_lib, labeller = labeller(M_lib = M_lib.labs)) +
-  xlab("determinism") +
-  ylab("Segregation") +
-   ggtitle("Ethnic Conservatives = 1") +
-  theme_bw() +
-  theme(legend.position = "bottom")
-  
-
-ggpubr::ggarrange(Mgl_lib_p,Mgl_con_p, nrow =2, common.legend=TRUE, legend = "bottom")
 
 ```
 
 
+\abstract{Extension}
 
+# INTRODUCTION {-}
 
+Residential segregation is a topic of interest to diverse disciplines in the social sciences due to its possible effects on reducing contacts between groups [@van2012neighbourhood].
+One main research question is on the reasons of observed segregation [@bolt2010linking].
+The spatial assimilation theory hypothesizes that the spatial distance between groups reflects their social distance and inequalities [@coulter2019ethnic]. 
+Instead, the place stratification theory focuses on the possible strategies of residents to reject newcomers [@horr2018ethnic]. 
+While these theories imply that segregation is the outcome of individual intentions, Schelling's model suggests that segregation can emerge as a consequence of the collective behavior of people in a city even without the specific intention to segregate.
+Thomas Schelling wrote some influential papers in the late 60's observing the residential segregation between white and black population in the U.S.A. [@schelling1969;@schelling1971;@schelling1978]. 
+The main suggestion of Schelling was that the intention of people to leave a neighborhood fits a threshold  model, i.e. people have a desired proportion between in-group and out-group and establish a threshold of tolerance for the presence of the out-group based on it. 
+Only when the presence of the other group exceeds such a threshold and the proportion between groups is not desirable, people leave.
+This scenario has found application into the studies of residential segregation as a tipping point [@card2008tipping], in phenomena such as the white fight [@muller2018residential] and homophily preferences for first neighborhood selection [@magi2016types].
+The contribution of Schelling was to demonstrate that even mild preferences for similar ones, regardless of their reasons, could generate  dramatic and stable patterns of spatial segregation [@schelling1969;@clark1991residential].
+The reason is the interaction of people trying to satisfy their preferences into spatial constraints due to density of the population, as in the U.S. cities that inspired Schelling's work. 
+Although Schelling showed such dynamics through mathematical tools and graphs, he offered to the scientific community what is nowadays considered one of the first examples of agent-based model. 
 
-```{r Mfin_interaction,  include = TRUE}
-
-M_or <- M_fin %>%  filter(dominant_con==0.5 & dominant_lib==0.5) %>% filter(eth_con == 1 & val_lib == 1) %>% filter(eth_lib == 0.5) %>% filter(val_con == 0.5)  %>% gather(key=subgroup, value = Segra,et_sq,vl_sq, et_cl,vl_cl) %>%  mutate(
-  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
-   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" )) 
-
-lib_con_e <- ggplot(M_or[which(M_or$subgroup==c("et_cl")),],aes(x=determinism,y=Segra,color= as.factor(M_con))) +  geom_point(size=2) + geom_line() +
-  facet_wrap(~ M_lib, labeller = labeller(M_lib = M_lib.labs)) +
-  scale_color_manual(values=c("green","red","blue"), labels=c("0.1","0.5","1"),name="M value conservative") +
-#  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Ethnic Segregation") +
-  theme_bw() +
-   theme(legend.position = "bottom")
-
-lib_con_v <- ggplot(M_or[which(M_or$subgroup==c("vl_cl")),],aes(x=determinism,y=Segra,color= as.factor(M_con))) +  geom_point(size=2) + geom_line() +
-  facet_wrap(~ M_lib, labeller = labeller(M_lib = M_lib.labs)) +
-  scale_color_manual(values=c("green","red","blue"), labels=c("0.1","0.5","1"),name="M value conservative") +
-#  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Value Segregation") +
-  theme_bw() +
-   theme(legend.position = "bottom")
 
-libs <- ggpubr::ggarrange(lib_con_e,lib_con_v, nrow =2, common.legend=TRUE, legend = "bottom")
+In our previous contribution [@paolillo2018], we explored alternatives to the condition in Schelling of similarity based on a "twofold, exhaustive and recognizable distinction" [@schelling1969, 488]. We introduced an alternative to this assumption for several reasons. Theoretically, the perspective of ethnic boundary making challenges the definition of in-group and out-group members as a direct and implicit consequence of ethnic membership [@wimmer2007not;@wimmer2013]. On the contrary, this stream of research focuses on the symbolic and social boundaries between groups built upon the ethnic membership of individuals and that regulate inter-ethnic relations [@bail2008configuration]. The interest of ethnic boundary making is on the mechanisms that generate and administer the definition, inclusion or exclusion of minorities and their members [@wimmer2013;@wimmer2008making]. We considered this approach noteworthy in light of modern and diverse societies where ethnicity can be only one of many categories people belong to [@crul2016super;@verkuyten2004social]. Our goal was to adapt the homophily behavior in Schelling's model to this complexity, and investigate the consequences of definition of similarity independent of ethnic membership. 
+ We introduced the cross-category of value orientation of agents, conceptualized as tolerance towards diversity. We attributed different homophily preferences to agents based on their value orientation. Intolerant agents subscribed to ethnic homophily preferences, considering as similar the members of their ethnic group [@mcpherson2001birds] independent of their value orientation.
+They basically followed the original Schelling's model. Tolerant agents subscribed to value homophily [@fiorina2008political], considering as similar other tolerant agents, independent of their ethnicity. The relocation dynamic due to proportion of similar ones and threshold behavior was the same as in the original Schelling. Additionally, we explored the role of relative group sizes.
+This is historically considered the condition for minority groups, which have lower probability to aggregate with similar ones, increasing the assimilation process to majority [@blau1977macrosociological]. As @schelling1971 suggested, this condition has clear implications for segregation dynamics, although only a few simulation studies have addressed explicitly  the role of relative group sizes  [@troitzsch2017axiomatic;@fossett2011generative]. 
+We considered this aspect important due to the interdependence of value and ethnic preferences. 
+The introduction of value-oriented agents caused a decrease in ethnic segregation compared to the original Schelling's model. Yet, spillover effects emerged, with ethnically mixed neighborhoods formed by tolerant agents becoming attractive to intolerant agents due to the presence of members of their ethnic group. Intolerant agents in the minority condition seemed more sensitive to this dynamic. The consequence of such dynamic was to increase the ethnic homogeneity of neighborhoods filled by intolerant agents.
+We explored until which concentration rate tolerant agents would have tolerated intolerant agents before leaving. We linked our work to @esser2010's theoretical model of intergenerational integration. In this rational model, the process of integration of younger migrant generations is theorized as a rational choice between their ethnic context and the receiving context of broader society. Resources and costs to investment are assumed to be the result of the integration of previous generations. Ethnic boundaries and relative group sizes are considered key predictors to the formation of expected utility  of young migrants, and per se they are the consequence of integration of previous generations. One goal of our paper was to link Schelling's framework to this perspective considering residential segregation one outcome of migrant integration [@martone2014immigrant], as well as a predictor to it [@massey1994migration], which can summarize the role of ethnic group sizes and ethnic boundaries in Esser's framework.
 
-libs <- ggpubr::annotate_figure(libs,
-               top = text_grob("Behavior Liberals \n(maximize value)",size = 13))
+In this paper, I present an extension to our model. First, I am interested in the attribution of value preferences and ethnic preferences to all agents. In our previous work we excluded this condition, both to better understand the model and not move too away from Schelling's model for comparison. Letting agents have both ethnic and value homophily preferences is both coherent with the interests stated above and empirically valid. The most important extension of this paper is to model the relocation decision of agents according to random utility models for discrete choice. These models are successfully used in residential studies to connect the characteristics  of neighborhoods selected with the socio-demographic profiles of people  [@borghans2015parental;@boschman2015neighbourhood]. They can contribute to the initialization of agent-based models and their empirical calibration. Additionally, a growing number of studies is already implementing random utility models in Schelling's dynamics [@zhang2004;@xie2012modeling;@bruch2014population]. A famous study in this direction is the one by @bruch2006 which applied random utility models in Schelling and compared the original threshold model with different functional forms of utility, in particular single-peaked function. The conclusion of the study was that linear function would increase integration over segregation. Although it was demonstrated that the conclusion was not corrected [@van2009] and the authors acknowledged for it [@bruch2009preferences], the intuition to use single-peaked function within relocation moves demonstrates more fine-grained scenarios than in the original Schelling. In particular, using the single-peaked function allows to move out of homophily segregationist preferences, but to include the whole range spanning from avoidance of the own group, integrationist preferences between groups and segregationist preferences to the own group. Additionally, some of these studies demonstrate how to link empirical data to calibration of agent-based models estimating preference parameters from random utility models [@xie2012modeling;@bruch2014population]. Adapting our model to this direction seems a promising venue both for theoretical and empirical benefits.
 
+In sum, in this paper I present an extension to our previous work [@paolillo2018] where Schelling's model was extended by introducing the category of value orientation of agents independent of ethnic homophily and exploring the interdependence between value segregation and ethnic segregation. Here I formalize the relocation decision of agents for both value homophily and ethnic homophily within the framework of random utility models for discrete choice. Additionally, I explore the effect of relative group sizes  on such dynamics.
 
-con_lib_e <- ggplot(M_or[which(M_or$subgroup==c("et_sq")),],aes(x=determinism,y=Segra,color= as.factor(M_lib))) +  geom_point(size=2) + geom_line() +
-  facet_wrap(~ M_con, labeller = labeller(M_con = M_con.labs)) +
-  scale_color_manual(values=c("green","red","blue"), labels=c("0.1","0.5","1"),name="M ethnic liberals") +
-#  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Ethnic Segregation") +
-  theme_bw() +
-   theme(legend.position = "bottom")
 
-con_lib_v <- ggplot(M_or[which(M_or$subgroup==c("vl_sq")),],aes(x=determinism,y=Segra,color= as.factor(M_lib))) +  geom_point(size=2) + geom_line() +
-  facet_wrap(~ M_con, labeller = labeller(M_con = M_con.labs)) +
-  scale_color_manual(values=c("green","red","blue"), labels=c("0.1","0.5","1"),name="M ethnic liberals") +
-#  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Value Segregation") +
-  theme_bw() +
-   theme(legend.position = "bottom")
+# Method {-}
 
-cons <- ggpubr::ggarrange(con_lib_e,con_lib_v, nrow =2, common.legend=TRUE, legend = "bottom")
+The core of Schelling's model is to link the micro level of people's preferences to the macro phenomenon of segregation, formalizing the conditions of the emergent system behavior [@schelling1969;@schelling1971;@schelling1978]. Due to this, Schelling's model is considered a paradigmatic case of agent-based modeling [@epstein1996growing;@hatna2012schelling]. As a method, agent-based models are computer simulations able to reproduce complex systems as a society and its components, called agents, which can represent people with preferences, together with the contextual conditions of their interactions such as density of the population. The main advantage of the method is to link the individual behavior of agents (micro level) with the emergent behavior of the society (macro level) [@gilbert2005simulation]. To understand the emergence of complex phenomena as segregation, researchers can manipulate preferences people want to maximize and the context of their actions, observing the outcome of manipulation and adjust to the formalization of the mechanisms.
 
-cons <- ggpubr::annotate_figure(cons,
-               top = text_grob("Behavior Conservatives \n(maximize ethnicity)",size = 13))
+The agent-based model I present shows a city where agents relocate according to their neighborhood preferences, which depend on the proportion of agents with the same ethnicity and the same value orientation. At each step, an agent compares its current location to an alternative one, with the intention to select the neighborhood that maximizes its preferences. The process is modeled as a binary choice between two discrete options and fits the paradigm of random utility models. According to discrete choice, when people choose between two options, they will select the one which has the highest utility, i.e. desirability [@bruch2009preferences;@manski1977structure]. Utility of options depends on their characteristics and how they are assessed by people preferences [@mcfadden2001economic]. In this paper, the options agents assess are neighborhoods, and utility refers to the maximization of homophily preferences.
 
-libs
-cons
+The way agents rank the desirability of different neighborhoods depends on the functional forms implemented. In this paper, I use the single-peaked function, according to which agents have an ideal point, i.e. the desired concentration of similar ones for each dimension, and use this to rank the utility of neighborhoods. Annex A shows the single-peaked function used for each desired concentration. Utility $U \in[0,1]$ is linearly increasing when its value or ethnic concentration gets closer to the ideal point and reaches the max utility peak $U=1$ when the concentration of a neighborhood is equal to the ideal point. Utility of neighborhoods whose concentration exceeds the ideal concentration is linearly decreasing. The single-peaked function I formulated is a simplification of the one used by @zhang2011. I derive the right slope of decreasing utility from the ideal point itself, as follows:
 
 
- ggplot(M_or,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-   scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
-  facet_grid(M_con ~  M_lib, labeller = labeller(M_lib = M_lib.labs, M_con = M_con.labs)) +
-  xlab("determinism") +
-  ylab("Segregation") +
-  # ggtitle("Ethnic Conservatives = 1") +
-  theme_bw() +
-  theme(legend.position = "bottom")
- 
- 
-libs
- 
+$$
+U=
+\begin{cases}
+(\frac{x}{n \times i_e}), & \text{if} \ x <= n\times i_e, \\
+\\
+i_e + \frac{(1 - \frac{x}{n}) \times (1 - i_e)}{1 - i_e}, & \text{if} \ x > n\times i_e 
+\end{cases}
+$$
+where: \par
+- $U$: utility of a neighborhood
+- $x$: number of similar agents in the neighborhood
+- $n$: total number of agents in the neighborhood
+- $i_e$: desired composition of similar ones
 
- 
- 
-```
+The same applies for ethnic utility $U_e$ ($x$ = agents with same ethnicity), and value utility $U_v$ ($x$ = agents with same value orientation). \par
 
+A classical paradigm of utility maximization would assume that the probability for an agent to leave its current neighborhood is certain once the utility of the alternative location exceeds the current one:
 
 
+$$
+P_{alternative}=U_{alternative} -  U_{current}
+$$
+where: \par
+- $P_{alternative}=1$ means moving to the alternative neighborhood, implying its utility is higher than the current one
+- $P_{alternative}=0$ means staying on the current location, implying its utility is higher than the alternative
 
-##### Back
+The same for current neighborhood chosen over the alternative one. \par
+\par
 
+This would imply that the best option is always selected, and that observed characteristics are the only attributes that influence the choice of people [@bruch2009preferences]. The paradigm of random utility models relaxes this assumption. The key concept is that the real processes behind the decision of people are unknown, and the utility maximization assumption can be only an approximation of those processes [@hess2018revisiting]. Each decision made is considered to consist of both a systematic component of utility and a random term [@bruch2009preferences; @train2009discrete;@manski1977structure]. The systematic component of utility refers to the observed differences between options and how they are assessed. It is the equivalent of $U_e$ and $U_v$ calculated. The random term represents other characteristics of the option, of the selector, or interaction of both, which can influence the choice in addition  to systematic differences in utility but are unknown. To calculate whether the choice was due to the systematic differences in utility or due to random term, each dimension of utility is weighted by a parameter of determinism $\beta\in[0,\infty)$: $\beta_e$ for $U_e$ and $\beta_v$ for $U_v$. The higher the $\beta$ for each dimension of utility, the lower is the effect of the random term in the decision outcome compared to that dimension, so that only the  differences observed for that dimension matter, and the best option is taken. $\beta = 0$ for one dimension means that systematic differences in utility for that dimension do not matter, and all options have equal probability to be selected due to higher effect of the random term. The probability to select the alternative neighborhood then becomes:
 
-```{r dominant_baseline complicated,  include = TRUE}
-# Simplify
 
-M2_dom <- M2_dom  %>%   gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
-  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
-   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" )) 
+$$
+P_{alternative}   = \beta_e U_e + \beta_v U_v  + \epsilon
+$$
+where: \par
+- $P_{alternative}$: probability to select the alternative neighbohrood
+- $\beta_e U_e$: parameter for ethnic utility times the ethnic utility attributed to alternative
+- $\beta_v U_v$: parameter for value utility times the value utility attributed to alternative
+- $\epsilon$: random term for the selection of alternative neighborhood \par
 
-# M2_baseline <- M2_dom %>% filter(val_lib == 0.5)
-M2_dom_bsl <- M2_dom %>% filter(val_lib == eth_con & M_con_dom == 1 & M_lib_dom == 1) %>% filter(val_lib == 0.5 | val_lib == 1 )
-bsl <- ggplot(M2_dom_bsl,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-  scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
-facet_wrap(~ val_lib) +
-  xlab("determinism") +
-  ylab("Segregation") +
-    theme_bw() +
-  theme(legend.position = "bottom")
-  
-  
-  bsl_lib <- M2_dom %>% filter(eth_con==1) %>% filter(val_lib==0.5 | val_lib==1)
-bsl_lib_p <-  ggplot(bsl_lib,aes(x=determinism,y=Segra,shape=`orientation`,color= `segregation`)) +  geom_point(size=2) + geom_line() +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-  scale_color_manual(values=c("purple","green"),labels=c("ethnic","value"),name="Segregation \ntype") +
-  facet_grid(~ eth_con + val_lib) +
-  xlab("determinism") +
-  ylab("Segregation") +
-    theme_bw() +
-  theme(legend.position = "bottom")
-bsl_lib_p
+The same for current neighborhood.\par
 
+$\beta_e U_e + \beta_v U_v$ represents the deterministic component in the relocation decision. Parameters $\beta$ are basically the equivalent of the coefficient of regression that can be estimated from the choice people made and related  to their characteristics. The contribution of @mcfadden1973conditional and his conditional logit to random utility models was to elaborate a formula to calculate the probability to select one option over the others from estimation of $\beta$ once it is assumed that the random term $\epsilon$ is unknown to the researcher and cannot be estimated. The necessary assumption is that the random term is independent and identically distributed among the alternatives (i.i.d.), so that only difference in observed characteristics will influence the relocation process [@train2009discrete]. To fit such condition, it is assumed that random terms are distributed according to an extreme value distribution, generally a Gumbel distribution [@hess2018revisiting;@manski1977structure]. The probability for an option $j$ to be selected out of a set of options $k$ is:
 
-bsl
-```
 
+$$
+P_{j}=\frac{\exp(\beta_e U_e + \beta_v U_v)}{\sum\exp(\beta_e U^k_e + \beta_v U^k_v)}
+$$
 
+The same for each option $k$.\par
+\par
 
+The exponential function serves to satisfy the assumption that random term has extreme value distribution. The particularity of this equation is that not necessarily the best option is selected, neither any option has probability completely equal 0. Still, when $\beta$ is high, options with higher utility $U$ for that dimension have higher chance to be selected. For $\beta=0$, each option has same probability to be selected, not matter the difference in utility $U$ for that dimension. This formula is considered the "mother logit formula" [@hess2018revisiting, p.186] for random utility models in discrete choice decisions. In the case of agent-based modeling, the final decision is modeled by throwing a random-float number $r \in[0,1]$ and compare the computed probability for each option to it. The option whose probability is higher than $r$ is selected [@bruch2012methodological]. In my model, I use a simplified version of @mcfadden1973conditional's formula for binary logit, and calculate it  oly for the alternative options to relocate to. My decision is because  if the alternative option is not selected, the agent doesn't move from its current location. This would be the same of probability for current location higher than the alternative. Since the relocation choice is continuously reiterated, the number of options at each choice does not influence the final emerging result, as tested in the model and common practice in computational work [@bruch2006;@zhang2004]. \par
+The probability of an agent to relocate to the alternative location is:
 
-```{r global_analysis, fig.cap="Analysis global", include=FALSE}
+$$
+P_{alternative}=\frac{1}{1 + \exp((\beta_eU^{cr}_e + \beta_vU^{cr}_v) - (\beta_eU^{al}_e + \beta_vU^{al}_v))}
+$$
+where: \par
+- $\beta_eU^{cr}_e + \beta_vU^{cr}_v$: systematic utility of current location as sum of ethnic utility and value utility, times the relative $\beta$
+- $\beta_eU^{al}_e + \beta_vU^{al}_v$: systematic utility of alternative location as sum of ethnic utility and value utility, times the relative $\beta$
 
-excl <- names(glob) %in% c("run", "density","step","utility_function")
-glob <- glob[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,eth_con,val_lib,eth_lib,val_con,determinism) %>% summarise_all(mean)
+The same for current location, not calculated here.\par
+\par
+@train2009discrete (p. 39) demonstrates how this is the equivalent of @mcfadden1973conditional's formula for two options. 
 
+# Model and Experiments {-}
 
+The model^[The model can be found here:https://github.com/RoccoPaolillo/Integr-Segr.git] is built in NetLogo 6.1.1, a programmable modeling environment [@Wilenskynl] and extends the Schelling version available to users [@Wilenskysm]. The model represents a grid where each point, called node, can host only one agent, or being empty. An agent represents a person choosing which node to relocate to based on the characteristics of its neighborhood. The neighborhood is modeled as a Moore distance, i.e. the 8 nodes surrounding the potential node. An agent is characterized by two attributes: ethnicity and value orientation. Ethnicity is modeled through color of agents, value orientation through their shape. Two ethnic groups live in the society, *blue* population and *orange* population. Each agent has a value orientation, which can be either *square* or *circle*. In total, 4 subgroups of agents relocate in the city: square blue, square orange, circle blue, circle orange. See Fig: \ref{fig:interfacefig} for the interface and graphical summary of the model. A parameter regulates the density of the overall population of agents, with the probability for each node to host an agent at time 0.  Ethnic relative group size is implemented with the probability for each agent to belong to the majority group (blue) or minority (orange), regulated by tunable parameters. Finally, two independent parameters regulate the probability for agents to belong either to value square orientation or circle value orientation.\par
 
 
-```
 
+Agents calculate $U_e$ and $U_v$ depending on their value orientation (shape). Value utility $U_v$ refers to the desired concentration of agents in the neighborhood with the same value of the selector (the shape), regardless of their ethnicity (the color). Ethnic utility $U_e$ refers to desired the concentration of agents in the neighborhood with the same ethnicity (the color), regardless of their value orientation (the shape). 4 parameters regulate the systematic component of utility for each value orientation group (circle and square, independent of ethnicity):
 
-```{r M, fig.cap="General M", include=TRUE}
+* $ie$: desired concentration for ethnic utility $U_e$
+* $iv$: desired concentration for value utility $U_v$
+* $\beta_e$: parameter of determinism for ethnic utility $U_e$
+* $\beta_v$: parameter of determinism for value utility $U_v$
+-->
 
-M <- read.csv("datasets/M.csv",sep=",")
-M$et_sq <- rowMeans(M[,c("et_sq_bl","et_sq_or")],na.rm = TRUE)
-M$vl_sq <- rowMeans(M[,c("vl_sq_bl","vl_sq_or")],na.rm = TRUE)
-M$et_cl <-  rowMeans(M[,c("et_cl_bl","et_cl_or")],na.rm = TRUE)
-M$vl_cl <-  rowMeans(M[,c("vl_cl_bl","vl_cl_or")],na.rm = TRUE)
-excl <- names(M) %in% c("run", "density","step")
-M <- M[,!excl] %>% group_by(fraction_blue,circle_blue,circle_orange,dominant_con,M_con,eth_con,val_con,dominant_lib,M_lib,val_lib,eth_lib,determinism) %>% summarise_all(mean)
-
-
-
-
-M_glob <- M %>% gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
-  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
-   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" ))
-
-
-M_d <- M_glob %>% filter(dominant_con ==1,dominant_lib==1,M_con==1,M_lib==1)
-
-baseline_M <- ggplot(M_d,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Segregation") +
-  theme_bw()
-
-
-M_etlib <- M_glob %>% filter(dominant_con == 0.5,dominant_lib==0.5,M_con == 0.5) 
-ggplot(M_etlib,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
-  facet_wrap(~ M_lib) +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Segregation") +
-  theme_bw()
-
-# leaving dominant_lib= 1 too strong
-# increasing val_con, implicit the value segregation will increase
-
-M_cons <- M_glob %>% filter(dominant_con == 0.5,dominant_lib==0.5,M_lib ==0.5) # by-product too strong
-ggplot(M_cons,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
-  facet_wrap(~ M_con) +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Segregation") +
-  theme_bw()
-
-
-```
-
-```{r M_orientation, fig.cap="Sorted by orientation", inckude= TRUE}
-
-M_or <- M %>%  filter(dominant_con==0.5 & dominant_lib==0.5)   %>% filter(M_con ==0.1|M_con == 0.5|M_con ==1) %>% filter(M_lib==0.1|M_lib==0.5|M_lib==1) %>% gather(key=subgroup, value = Segra,et_sq,vl_sq, et_cl,vl_cl)
-
-lib_con <- ggplot(M_or[which(M_or$subgroup==c("et_cl","vl_cl")),],aes(x=determinism,y=Segra,linetype=subgroup,color= as.factor(M_lib))) +  geom_point(size=2) + geom_line() +
-  facet_wrap(~ M_con) +
-  scale_color_manual(values=c("purple","green","red","blue"), labels=c("0","0.1","0.5","1"),name="M_lib") +
-  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Segregation") +
-  ggtitle("Liberals,facet:conservatives") +
-  theme_bw()
-
-
-con_lib <- ggplot(M_or[which(M_or$subgroup==c("et_sq","vl_sq")),],aes(x=determinism,y=Segra,linetype=subgroup,color= as.factor(M_con))) +  geom_point(size=2) + geom_line() +
-  facet_wrap(~ M_lib) +
-  scale_color_manual(values=c("purple","green","red","blue"), labels=c("0","0.1","0.5","1"),name="M_con") +
-  scale_linetype_manual(values=c("solid","dashed"),labels=c("Ethnic","Value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Segregation") +
-  ggtitle("Conservatives, facet:liberals") +
-  theme_bw()
-
-lib_con
-con_lib
-# %>% mutate(  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic"="et_cl","values"="vl_cl"),"ethnic"))
-
-```
-
-
-```{r sp_baseline, include=TRU}
-# There is nothing special from the sp function....
-
-sp_diagonal <- sp_diagonal %>%  gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
-  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
-   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" ))
-
-ggplot(sp_diagonal,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
-  facet_wrap(~secondary) +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Segregation") +
-  ggtitle("Y: val_con, X: eth_lib")  +
-  theme_bw()
-
-
-sp <- sp %>%  gather(key=subgroup, value = Segra, et_sq,vl_sq,et_cl,vl_cl) %>%  mutate(
-  `segregation` = fct_relevel(fct_collapse(subgroup,"ethnic" = c("et_sq","et_cl"),"values" = c("vl_sq","vl_cl")),"ethnic" ),
-   `orientation` = fct_relevel(fct_collapse(subgroup,"conservative" = c("et_sq","vl_sq"),"liberal" = c("et_cl","vl_cl")),"conservative" ))
-
-sp_et <- sp %>% filter(dominant_con == 0.5 & dominant_lib==0.5) %>% filter(eth_lib == 0.5)
-  
-ggplot(sp_et,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
-  facet_wrap(~val_con) +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Segregation") +
-  # ggtitle("Y: val_con, X: eth_lib")  +
-  theme_bw()
-
-
-sp_vl <- sp %>% filter(dominant_con == 0.5 & dominant_lib==0.5) %>% filter(val_con == 0.5)
-  
-ggplot(sp_vl,aes(x=determinism,y=Segra,shape=`orientation`,linetype= `segregation`)) +  geom_point(size=2) + geom_line() +
-  facet_wrap(~eth_lib) +
-  scale_shape_manual(values=c("square","circle"), labels=c("conservative","liberal"),name="Agents") +
-  scale_linetype_manual(values=c("solid","dashed"),labels=c("ethnic","value"),name="Segregation \ntype") +
-  xlab("determinism") +
-  ylab("Segregation") +
-  # ggtitle("Y: val_con, X: eth_lib")  +
-  theme_bw()
-
-
-
-```
+# References

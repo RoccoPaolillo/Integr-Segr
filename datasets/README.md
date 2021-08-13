@@ -1,3 +1,0 @@
-- global.csv: global determinism > rp_commonbeta.nlogo
-- basic.csv: complementary dominant-secondary > value_weight.nlogo
-- M.csv: decreasing utility > value_weight.nlogo
