@@ -5,9 +5,16 @@ output:
 toc: false
 fig_caption: yes
 title: "Segregationist and integrationist preferences for cross-category in Schelling model"
-author: "Rocco Paolillo"
+author: 
+    | 
+    | Rocco Paolillo 
+    | 
+    | **` NOTES TO REMEMBER `**
+    | **` 20 runs combined `**
+    | **` synched BRD lit deleted `**
+    |
 keywords: "spatial segregation, discrete choice, integration"
-date: "one dataset on 20 runs `r format(Sys.time(), '%d/%m/%y %H:%M')`"
+date: "`r format(Sys.time(), '%d/%m/%y %H:%M')`"
 bibliography: "references.bib"
 
 header-includes: 
@@ -29,6 +36,46 @@ library(plotly)
 library(gridExtra)
 library(ggpubr)
 
+# To combine datasets
+
+# bsl <- read.csv("datasets/baseline.csv",sep = ",",skip= 6)
+# bsl$ID <- "bsl"
+# 
+# both_sec1_1 <- read.csv("datasets/both_sec_1.csv", sep = ",",skip= 6)
+# both_sec1_2 <- read.csv("datasets/both_sec_1_2.csv",sep = ",",skip=6)
+# both_sec_1_3 <- read.csv("datasets/both_sec_1_3.csv",sep = ",",skip=6)
+# both_sec_1_4 <- read.csv("datasets/both_sec_1_4.csv",sep = ",",skip=6)
+# both_sec <- rbind(both_sec1_1,both_sec1_2,both_sec_1_3,both_sec_1_4)
+# both_sec$ID <- "both_sec1"
+# 
+# both_sec05_1 <- read.csv("datasets/both_sec_05.csv",sep=",",skip=6)
+# both_sec05_2 <- read.csv("datasets/both_sec_05_2.csv",sep=",",skip=6)
+# both_sec05_3 <- read.csv("datasets/both_sec_05_3.csv",sep=",",skip=6)
+# both_sec05_4 <- read.csv("datasets/both_sec_05_4.csv",sep=",",skip=6)
+# both_sec05 <- rbind(both_sec05_1,both_sec05_2,both_sec05_3,both_sec05_4)
+# both_sec05$ID <- "both_sec05"
+# 
+# eth_lib <- read.csv("datasets/eth_lib.csv",sep=",",skip=6)
+# eth_lib$ID <- "eth_lib"
+# 
+# int_con1 <- read.csv("datasets/int_con.csv",sep=",",skip=6)
+# int_con2 <- read.csv("datasets/int_con2.csv",sep=",",skip=6)
+# int_con <- rbind(int_con1,int_con2)
+# int_con$ID <- "int_con"
+# 
+# int_lib1 <- read.csv("datasets/int_lib.csv",sep=",",skip=6)
+# int_lib2 <- read.csv("datasets/int_lib2.csv",sep=",",skip=6)
+# int_lib <- rbind(int_lib1,int_lib2)
+# int_lib$ID <- "int_lib"
+# 
+# df <- rbind(bsl,both_sec,both_sec05,eth_lib,int_con,int_lib)
+# 
+# names(df)[names(df) == "X.run.number."] <- "run"
+# names(df)[names(df) == "X.step."] <- "step"
+# 
+# write.csv(df,"datasets/df_fin.csv",row.names = F)
+
+df <- read.csv("datasets/df_fin.csv",sep= ",")
 
 ```
 
