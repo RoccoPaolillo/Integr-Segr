@@ -38,7 +38,7 @@ library(ggpubr)
 library(gitcreds)
 
 
-gitcreds_set()
+# gitcreds_set()
 
 # To combine datasets
 
@@ -88,7 +88,6 @@ df <- read.csv("datasets/df_fin.csv",sep= ",")
 
 # INTRODUCTION {-}
 
-Given a try \par
 Residential segregation is a topic of interest to diverse disciplines in the social sciences due to its possible effects on reducing contacts between groups [@van2012neighbourhood].
 One main research question is on the reasons of observed segregation [@bolt2010linking].
 The spatial assimilation theory hypothesizes that the spatial distance between groups reflects their social distance and inequalities [@coulter2019ethnic]. 
