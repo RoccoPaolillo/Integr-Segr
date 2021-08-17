@@ -26,6 +26,12 @@ header-includes:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(digits = 3)
+
+dir.create("images")  
+# dir.create("latex")  
+
+
 library(ggplot2)
 library(dplyr)
 library(reshape2)
@@ -39,7 +45,6 @@ library(gitcreds)
 
 
 # gitcreds_set()
-
 # To combine datasets
 
 # bsl <- read.csv("datasets/baseline.csv",sep = ",",skip= 6)
@@ -80,6 +85,15 @@ library(gitcreds)
 # write.csv(df,"datasets/df_fin.csv",row.names = F)
 
 df <- read.csv("datasets/df_fin.csv",sep= ",")
+
+df <- df %>% select(-run) %>% group_by(ID,density,fraction_blue,circle_blue,circle_orange,dominant_con,M_con_dom,eth_con,M_con_sec,val_con,dominant_lib,M_lib_dom,val_lib,M_lib_sec,eth_lib,determinism, step) %>% summarise_all(mean) %>% gather(key = group_bsl, value = Segra_bsl, et_cl,et_sq,vl_cl,vl_sq,den_sq,den_cl)  %>%
+  mutate(`outcome` = fct_relevel(fct_collapse(group_bsl,
+                                              "Ethnic" = c("et_sq","et_cl"),
+                                              "Density" = c("den_sq","den_cl"),
+                                              "Value" = c("vl_sq","vl_cl")),"Ethnic"),
+         `orientation` = fct_relevel(fct_collapse(group_bsl,
+                                                  "Conservative" = c("et_sq","vl_sq","den_sq"),
+                                                  "Liberal" = c("et_cl","vl_cl","den_cl")), "Conservative"))
 
 ```
 
