@@ -23,7 +23,7 @@ header-includes:
 - \usepackage{subcaption}
 - \usepackage{xfrac}  
 ---
-
+\newcommand{\rocco}[1]{{\textcolor{red}{Rocco: #1}}} <!-- # to add comments -->
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 options(digits = 3)
@@ -86,7 +86,8 @@ library(gitcreds)
 
 df <- read.csv("datasets/df_fin.csv",sep= ",")
 
-df <- df %>% select(-run) %>% group_by(ID,density,fraction_blue,circle_blue,circle_orange,dominant_con,M_con_dom,eth_con,M_con_sec,val_con,dominant_lib,M_lib_dom,val_lib,M_lib_sec,eth_lib,determinism, step) %>% summarise_all(mean) %>% gather(key = group_bsl, value = Segra_bsl, et_cl,et_sq,vl_cl,vl_sq,den_sq,den_cl)  %>%
+df_bsl <- df %>% select(-run) %>% group_by(ID,density,fraction_blue,circle_blue,circle_orange,dominant_con,M_con_dom,eth_con,M_con_sec,val_con,dominant_lib,M_lib_dom,val_lib,M_lib_sec,eth_lib,determinism, step) %>% summarise_all(mean) %>% 
+  gather(key = group_bsl, value = Segra_bsl, et_cl,et_sq,vl_cl,vl_sq,den_sq,den_cl)  %>%
   mutate(`outcome` = fct_relevel(fct_collapse(group_bsl,
                                               "Ethnic" = c("et_sq","et_cl"),
                                               "Density" = c("den_sq","den_cl"),
@@ -126,7 +127,25 @@ We explored until which concentration rate tolerant agents would have tolerated 
 
 In this paper, I present an extension to our model. First, I am interested in the attribution of value preferences and ethnic preferences to all agents. In our previous work we excluded this condition, both to better understand the model and not move too away from Schelling's model for comparison. Letting agents have both ethnic and value homophily preferences is both coherent with the interests stated above and empirically valid. The most important extension of this paper is to model the relocation decision of agents according to random utility models for discrete choice. These models are successfully used in residential studies to connect the characteristics  of neighborhoods selected with the socio-demographic profiles of people  [@borghans2015parental;@boschman2015neighbourhood]. They can contribute to the initialization of agent-based models and their empirical calibration. Additionally, a growing number of studies is already implementing random utility models in Schelling's dynamics [@zhang2004;@xie2012modeling;@bruch2014population]. A famous study in this direction is the one by @bruch2006 which applied random utility models in Schelling and compared the original threshold model with different functional forms of utility, in particular single-peaked function. The conclusion of the study was that linear function would increase integration over segregation. Although it was demonstrated that the conclusion was not corrected [@van2009] and the authors acknowledged for it [@bruch2009preferences], the intuition to use single-peaked function within relocation moves demonstrates more fine-grained scenarios than in the original Schelling. In particular, using the single-peaked function allows to move out of homophily segregationist preferences, but to include the whole range spanning from avoidance of the own group, integrationist preferences between groups and segregationist preferences to the own group. Additionally, some of these studies demonstrate how to link empirical data to calibration of agent-based models estimating preference parameters from random utility models [@xie2012modeling;@bruch2014population]. Adapting our model to this direction seems a promising venue both for theoretical and empirical benefits.
 
-In sum, in this paper I present an extension to our previous work [@paolillo2018] where Schelling's model was extended by introducing the category of value orientation of agents independent of ethnic homophily and exploring the interdependence between value segregation and ethnic segregation. Here I formalize the relocation decision of agents for both value homophily and ethnic homophily within the framework of random utility models for discrete choice. Additionally, I explore the effect of relative group sizes  on such dynamics.
+
+<!--
+In sum, in this paper I present an extension to our previous work [@paolillo2018] where Schelling's model was extended by introducing the category of value orientation of agents independent of ethnic homophily and exploring the interdependence between value segregation and ethnic segregation. Here I formalize the relocation decision of agents for both value homophily and ethnic homophily within the framework of random utility models for discrete choice. Additionally, I explore the effect of relative group sizes  on such dynamics. -->
+
+Aim of the paper, in light of previous studies: 
+
+* how by-product value segregation of conservatives can be reduced through: \par
+
+  * lower concentration peaks \par
+  
+  * when also secondary preferences are taken into account --> extreme condition of integrationist preferences
+  
+    * a difference between value integrationist preferences of conservatives, this is more as robustness of the by-product, and ethnic integrationist preferences of liberals   \par
+    
+    * effect of randomness on these dynamics \par
+    
+* How results would change for ethnic asymmetric conditions \par
+
+
 
 
 # Method {-}
@@ -205,7 +224,7 @@ The same for current location, not calculated here.\par
 \par
 @train2009discrete (p. 39) demonstrates how this is the equivalent of @mcfadden1973conditional's formula for two options. 
 
-# Model and Experiments {-}
+# Model and Experiments \rocco{to revise} {-}
 
 The model^[The model can be found here:https://github.com/RoccoPaolillo/Integr-Segr.git] is built in NetLogo 6.1.1, a programmable modeling environment [@Wilenskynl] and extends the Schelling version available to users [@Wilenskysm]. The model represents a grid where each point, called node, can host only one agent, or being empty. An agent represents a person choosing which node to relocate to based on the characteristics of its neighborhood. The neighborhood is modeled as a Moore distance, i.e. the 8 nodes surrounding the potential node. An agent is characterized by two attributes: ethnicity and value orientation. Ethnicity is modeled through color of agents, value orientation through their shape. Two ethnic groups live in the society, *blue* population and *orange* population. Each agent has a value orientation, which can be either *square* or *circle*. In total, 4 subgroups of agents relocate in the city: square blue, square orange, circle blue, circle orange. See Fig: \ref{fig:interfacefig} for the interface and graphical summary of the model. A parameter regulates the density of the overall population of agents, with the probability for each node to host an agent at time 0.  Ethnic relative group size is implemented with the probability for each agent to belong to the majority group (blue) or minority (orange), regulated by tunable parameters. Finally, two independent parameters regulate the probability for agents to belong either to value square orientation or circle value orientation.\par
 
@@ -218,5 +237,60 @@ Agents calculate $U_e$ and $U_v$ depending on their value orientation (shape). V
 * $\beta_e$: parameter of determinism for ethnic utility $U_e$
 * $\beta_v$: parameter of determinism for value utility $U_v$
 -->
+
+# Experiments and Results {-}
+
+```{r bsl, fig.pos = "h", fig.cap="Baseline, comparing between randomness reciprocal effects conservatives vs liberals"}
+
+df_bsl %>% filter(ID == "bsl" & determinism == 20 & eth_con == 0.5) %>% ggplot(aes(x=val_lib, y=Segra_bsl, color = outcome, shape = orientation)) + geom_point(size = 1.5) + geom_line() +
+  #  facet_wrap(~ ID, dir = "v") +
+  scale_color_manual(values = c("Ethnic"="purple","Value"="dark green","Density" = "gray"), guide = guide_legend(title = "Segregation", order = 1)) +
+  scale_shape_manual(values = c("Conservative" = "square", "Liberal" = "circle"), guide = guide_legend(title = "Orientation")) +
+  scale_x_continuous(breaks= seq(0.1,1,by=0.1), limits=c(0.1,1)) +
+  xlab(
+    "Peak value liberals"
+  )  +
+  scale_y_continuous("Outcome") +
+  theme_bw() 
+  
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Conclusions and Discussion {-}
 
 # References
