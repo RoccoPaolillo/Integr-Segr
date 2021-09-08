@@ -9,9 +9,9 @@ author:
     | 
     | Rocco Paolillo 
     | 
-    | **` NOTES TO REMEMBER `**
-    | **` 20 runs combined `**
-    | **` synched BRD lit deleted `**
+    | **` Preliminary analysis `**
+    | **` To simplify, M not that relevant`**
+    | **`  `**
     |
 keywords: "spatial segregation, discrete choice, integration"
 date: "`r format(Sys.time(), '%d/%m/%y %H:%M')`"
@@ -244,7 +244,7 @@ Fig: \ref{fig:bsl} reports sensitivity to dominant preference, holding 0.5 the p
 
 * IDEA: Have as baseline both 0.5 (Hatna function) and span determinism on x-axis
 
-```{r bsl, fig.pos = "h", fig.cap="Baseline, comparing between randomness reciprocal effects conservatives vs liberals"}
+```{r bsl, fig.pos = "H", fig.cap="Baseline, comparing between randomness reciprocal effects conservatives vs liberals"}
 
 # determinism 20
 # liberals xlab, cons hold 0.5
@@ -258,6 +258,7 @@ lib_con_20 <- df_bsl %>% filter(ID == "bsl" & determinism == 20 & eth_con == 0.5
     "Peak value liberals"
   )  +
   scale_y_continuous("Outcome") +
+  ggtitle("Determinism 20") +
   theme_bw() 
 
 # conservatives xlab, lib hold 0.5
@@ -272,6 +273,7 @@ con_lib_20 <- df_bsl %>% filter(ID == "bsl" & determinism == 20 & val_lib == 0.5
     "Peak ethnic conservative"
   )  +
   scale_y_continuous("Outcome") +
+    ggtitle("Determinism 20") +
   theme_bw() 
 
 # determinism 5
@@ -286,6 +288,7 @@ lib_con_5 <- df_bsl %>% filter(ID == "bsl" & determinism == 5 & eth_con == 0.5) 
     "Peak value liberals"
   )  +
   scale_y_continuous("Outcome") +
+    ggtitle("Determinism 5") +
   theme_bw() 
 
 # conservatives xlab, lib hold 0.5
@@ -300,6 +303,21 @@ con_lib_5 <- df_bsl %>% filter(ID == "bsl" & determinism == 5 & val_lib == 0.5) 
     "Peak ethnic conservative"
   )  +
   scale_y_continuous("Outcome") +
+      ggtitle("Determinism 5") +
+  theme_bw() 
+
+
+all_same <- 
+con_lib_5 <- df_bsl %>% filter(ID == "bsl" & determinism == 20 & val_lib == eth_con) %>% ggplot(aes(x=eth_con, y=Segra_bsl, color = outcome, shape = orientation)) + geom_point(size = 1.5) + geom_line() +
+  #  facet_wrap(~ ID, dir = "v") +
+  scale_color_manual(values = c("Ethnic"="purple","Value"="dark green","Density" = "gray"), guide = guide_legend(title = "Segregation", order = 1)) +
+  scale_shape_manual(values = c("Conservative" = "square", "Liberal" = "circle"), guide = guide_legend(title = "Orientation")) +
+  scale_x_continuous(breaks= seq(0.1,1,by=0.1), limits=c(0.1,1)) +
+  xlab(
+    "Desired Peak"
+  )  +
+  scale_y_continuous("Outcome") +
+      ggtitle("Same peak") +
   theme_bw() 
 
 
@@ -308,6 +326,7 @@ lib_con_20
 con_lib_20
 lib_con_5
 con_lib_5
+all_same
 ```
 
 Fig. \ref{fig:sec_1_all}, increase of M for more integrationist or segregationist preference with dominant = 1, nothing special.
@@ -315,7 +334,7 @@ Here changes with \ref{fig:sec_05_all} where the desired peak is 0.5
 
 Mlib=1: higher segregation with Dominant = 0.5 than dominant = 1, checking for effect of M conservatives. Seems that if all want to not live in the minority, has higher segregation effects than wanting to maximize for 1 dimension and not being in the minority for the secondary
 
-```{r sec_1_all, fig.pos= h, fig.cap = "Effect of M on secondary preference"}
+```{r sec_1_all, fig.pos= "H", fig.cap = "Effect of M on secondary preference"}
 
 df_bsl$revM_con_sec = factor(df_bsl$M_con_sec, levels = c("1","0.5","0.1","0"))
 
@@ -433,7 +452,8 @@ scale_color_manual(values = c("Ethnic"="purple","Value"="dark green","Density" =
 ```
 
 <!--
-```{r sec_1, fig.pos = h,fig.cap = "DISCARD, can be facet_grid Dominant preference equal 1, integrationist preference for the other group"}
+
+```{r sec_1, fig.pos = "H",fig.cap = "DISCARD, can be facet_grid Dominant preference equal 1, integrationist preference for the other group"}
 
 sec_lib_con <- df_bsl %>% filter(ID == "both_sec1" & M_lib_sec == 0) %>% ggplot(aes(x=determinism, y=Segra_bsl, color = outcome, shape = orientation)) + geom_point(size = 1.5) + geom_line() +
   facet_wrap(~ M_con_sec, ncol=4) +
