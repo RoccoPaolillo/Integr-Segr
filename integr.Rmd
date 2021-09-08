@@ -133,17 +133,17 @@ In sum, in this paper I present an extension to our previous work [@paolillo2018
 
 Aim of the paper, in light of previous studies: 
 
-* how by-product value segregation of conservatives can be reduced through: \par
+* how by-product value segregation of conservatives can be reduced through: 
 
-  * lower concentration peaks \par
+  * lower concentration peaks 
   
   * when also secondary preferences are taken into account --> extreme condition of integrationist preferences
   
-    * a difference between value integrationist preferences of conservatives, this is more as robustness of the by-product, and ethnic integrationist preferences of liberals   \par
+    * a difference between value integrationist preferences of conservatives, this is more as robustness of the by-product, and ethnic integrationist preferences of liberals   
     
-    * effect of randomness on these dynamics \par
+    * effect of randomness on these dynamics 
     
-* How results would change for ethnic asymmetric conditions \par
+* How results would change for ethnic asymmetric conditions 
 
 
 
@@ -154,9 +154,24 @@ The core of Schelling's model is to link the micro level of people's preferences
 
 The agent-based model I present shows a city where agents relocate according to their neighborhood preferences, which depend on the proportion of agents with the same ethnicity and the same value orientation. At each step, an agent compares its current location to an alternative one, with the intention to select the neighborhood that maximizes its preferences. The process is modeled as a binary choice between two discrete options and fits the paradigm of random utility models. According to discrete choice, when people choose between two options, they will select the one which has the highest utility, i.e. desirability [@bruch2009preferences;@manski1977structure]. Utility of options depends on their characteristics and how they are assessed by people preferences [@mcfadden2001economic]. In this paper, the options agents assess are neighborhoods, and utility refers to the maximization of homophily preferences.
 
-The way agents rank the desirability of different neighborhoods depends on the functional forms implemented. In this paper, I use the single-peaked function, according to which agents have an ideal point, i.e. the desired concentration of similar ones for each dimension, and use this to rank the utility of neighborhoods. Annex A shows the single-peaked function used for each desired concentration. Utility $U \in[0,1]$ is linearly increasing when its value or ethnic concentration gets closer to the ideal point and reaches the max utility peak $U=1$ when the concentration of a neighborhood is equal to the ideal point. Utility of neighborhoods whose concentration exceeds the ideal concentration is linearly decreasing. The single-peaked function I formulated is a simplification of the one used by @zhang2011. I derive the right slope of decreasing utility from the ideal point itself, as follows:
+The way agents rank the desirability of different neighborhoods depends on the functional forms implemented. In this paper, I use the single-peaked function, according to which agents have an ideal point, i.e. the desired concentration of similar ones for each dimension, and use this to rank the utility of neighborhoods. Annex A shows the single-peaked function used for each desired concentration. Utility $U \in[0,1]$ is linearly increasing when its value or ethnic concentration gets closer to the ideal point and reaches the max utility peak $U=1$ when the concentration of a neighborhood is equal to the ideal point. Utility of neighborhoods whose concentration exceeds the ideal concentration is linearly decreasing. The single-peaked function I formulated is derived from @zhang2011. I derive the right slope of decreasing utility from the desired concentration itself, as follows:
 
 
+
+$$
+U=
+\begin{cases}
+(\frac{x}{n \times i_e}), & \text{if} \ x <= n\times i_e, \\
+\\
+(2 - M) + (((M - 1) * x) / (n * i_e)), & \text{if} \ x > n\times i_e 
+\end{cases}
+$$
+
+
+
+
+<!--
+# this formula works for the orginal paper (BIGSSS Research day), current data use M parameter
 $$
 U=
 \begin{cases}
@@ -165,13 +180,16 @@ U=
 i_e + \frac{(1 - \frac{x}{n}) \times (1 - i_e)}{1 - i_e}, & \text{if} \ x > n\times i_e 
 \end{cases}
 $$
+-->
+
 where: \par
 - $U$: utility of a neighborhood
 - $x$: number of similar agents in the neighborhood
 - $n$: total number of agents in the neighborhood
 - $i_e$: desired composition of similar ones
+- $M$: equivalent of utility when all neighbors are similar
 
-The same applies for ethnic utility $U_e$ ($x$ = agents with same ethnicity), and value utility $U_v$ ($x$ = agents with same value orientation). \par
+$M$ is needed to regulate the shape of utility for x for $x > n\times i_e $. The same applies for ethnic utility $U_e$ ($x$ = agents with same ethnicity), and value utility $U_v$ ($x$ = agents with same value orientation). \par
 
 A classical paradigm of utility maximization would assume that the probability for an agent to leave its current neighborhood is certain once the utility of the alternative location exceeds the current one:
 
