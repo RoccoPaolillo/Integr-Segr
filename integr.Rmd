@@ -149,6 +149,7 @@ Aim of the paper, in light of previous studies:
 
 
 # Method {-}
+\rocco{This section has to be revised. Definition of utility depends on model actually used. The description of random utility model outdated somewhere is confusing/wrong (mixing utility and probability)}
 
 The core of Schelling's model is to link the micro level of people's preferences to the macro phenomenon of segregation, formalizing the conditions of the emergent system behavior [@schelling1969;@schelling1971;@schelling1978]. Due to this, Schelling's model is considered a paradigmatic case of agent-based modeling [@epstein1996growing;@hatna2012schelling]. As a method, agent-based models are computer simulations able to reproduce complex systems as a society and its components, called agents, which can represent people with preferences, together with the contextual conditions of their interactions such as density of the population. The main advantage of the method is to link the individual behavior of agents (micro level) with the emergent behavior of the society (macro level) [@gilbert2005simulation]. To understand the emergence of complex phenomena as segregation, researchers can manipulate preferences people want to maximize and the context of their actions, observing the outcome of manipulation and adjust to the formalization of the mechanisms.
 
@@ -170,17 +171,6 @@ $$
 
 
 
-<!--
-# this formula works for the orginal paper (BIGSSS Research day), current data use M parameter
-$$
-U=
-\begin{cases}
-(\frac{x}{n \times i_e}), & \text{if} \ x <= n\times i_e, \\
-\\
-i_e + \frac{(1 - \frac{x}{n}) \times (1 - i_e)}{1 - i_e}, & \text{if} \ x > n\times i_e 
-\end{cases}
-$$
--->
 
 where: \par
 - $U$: utility of a neighborhood
@@ -204,16 +194,18 @@ where: \par
 The same for current neighborhood chosen over the alternative one. \par
 \par
 
-This would imply that the best option is always selected, and that observed characteristics are the only attributes that influence the choice of people [@bruch2009preferences]. The paradigm of random utility models relaxes this assumption. The key concept is that the real processes behind the decision of people are unknown, and the utility maximization assumption can be only an approximation of those processes [@hess2018revisiting]. Each decision made is considered to consist of both a systematic component of utility and a random term [@bruch2009preferences; @train2009discrete;@manski1977structure]. The systematic component of utility refers to the observed differences between options and how they are assessed. It is the equivalent of $U_e$ and $U_v$ calculated. The random term represents other characteristics of the option, of the selector, or interaction of both, which can influence the choice in addition  to systematic differences in utility but are unknown. To calculate whether the choice was due to the systematic differences in utility or due to random term, each dimension of utility is weighted by a parameter of determinism $\beta\in[0,\infty)$: $\beta_e$ for $U_e$ and $\beta_v$ for $U_v$. The higher the $\beta$ for each dimension of utility, the lower is the effect of the random term in the decision outcome compared to that dimension, so that only the  differences observed for that dimension matter, and the best option is taken. $\beta = 0$ for one dimension means that systematic differences in utility for that dimension do not matter, and all options have equal probability to be selected due to higher effect of the random term. The probability to select the alternative neighborhood then becomes:
+This would imply that the best option is always selected, and that observed characteristics are the only attributes that influence the choice of people [@bruch2009preferences]. The paradigm of random utility models relaxes this assumption. The key concept is that the real processes behind the decision of people are unknown, and the utility maximization assumption can be only an approximation of those processes [@hess2018revisiting]. Each decision made is considered to consist of both a systematic component of utility and a random term [@bruch2009preferences; @train2009discrete;@manski1977structure]. The systematic component of utility refers to the observed differences between options and how they are assessed. It is the equivalent of $U_e$ and $U_v$ calculated. The random term represents other characteristics of the option, of the selector, or interaction of both, which can influence the choice in addition  to systematic differences in utility but are unknown. To calculate whether the choice was due to the systematic differences in utility or due to random term, each dimension of utility is weighted by a parameter of determinism $\beta\in[0,\infty)$: $\beta_e$ for $U_e$ and $\beta_v$ for $U_v$. The higher the $\beta$ for each dimension of utility, the lower is the effect of the random term in the decision outcome compared to that dimension, so that only the  differences observed for that dimension matter, and the best option is taken. $\beta = 0$ for one dimension means that systematic differences in utility for that dimension do not matter, and all options have equal probability to be selected due to higher effect of the random term. Utility of the alternative neighborhood is:
 
 
 $$
-P_{alternative}   = \beta_e U_e + \beta_v U_v  + \epsilon
+U_{alternative}   = \beta_e X^{et}_e + \beta_v X^{vl}_v  + \epsilon
 $$
 where: \par
-- $P_{alternative}$: probability to select the alternative neighbohrood
-- $\beta_e U_e$: parameter for ethnic utility times the ethnic utility attributed to alternative
-- $\beta_v U_v$: parameter for value utility times the value utility attributed to alternative
+- $U_{alternative}$: Utility alternative neighbohrood
+- $\beta_e X_e$: parameter of determinism for ethnic utility
+- $X^{et}$: utility derived from ethnic composition of alternative
+- $\beta_v$: parameter of determinism for value utility
+- $X^{vl}$: utility derived from value composition of alternative
 - $\epsilon$: random term for the selection of alternative neighborhood \par
 
 The same for current neighborhood.\par
@@ -222,7 +214,7 @@ $\beta_e U_e + \beta_v U_v$ represents the deterministic component in the reloca
 
 
 $$
-P_{j}=\frac{\exp(\beta_e U_e + \beta_v U_v)}{\sum\exp(\beta_e U^k_e + \beta_v U^k_v)}
+P_{j}=\frac{\exp(\beta_e U^j_e + \beta_v U^j_v)}{\sum\exp(\beta_e U^k_e + \beta_v U^k_v)}
 $$
 
 The same for each option $k$.\par
